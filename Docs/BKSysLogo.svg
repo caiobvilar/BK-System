@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="0 0 300 150">
+  <!-- Background Rectangle -->
+  <rect width="300" height="150" fill="#1E3A8A" rx="10"/>
+
+  <!-- White Rectangle Shadow -->
+  <rect x="30" y="40" width="70" height="70" fill="#FFFFFF" rx="10"/>
+
+  <!-- Bold Letter "B" -->
+  <text x="65" y="90" font-family="Arial" font-size="60" fill="#1E3A8A" text-anchor="middle" font-weight="bold">B</text>
+
+  <!-- Text: BankSys (Positioned to the Right of the "B") -->
+  <text x="130" y="90" font-family="Arial" font-size="36" fill="#FFFFFF" text-anchor="left" font-weight="bold">BankSys</text>
+
+  <!-- Tagline: Secure. Reliable. Efficient. -->
+  <text x="130" y="120" font-family="Arial" font-size="14" fill="#FFFFFF" text-anchor="left">Secure. Reliable. Efficient.</text>
+</svg>

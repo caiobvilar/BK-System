@@ -1,0 +1,12 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "editor.formatOnSave": true,
+        "clang-format.executable": "/usr/bin/clang-format",
+        "c-cpp-flylint.cppcheck.executable": "/usr/bin/cppcheck"
+    }
+}
