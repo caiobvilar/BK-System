@@ -3,9 +3,23 @@
 #include <string>
 #include <vector>
 
+/**
+ * @class IDBServer
+ * @brief Interface for database server operations.
+ *
+ * This interface defines the basic operations required to interact with a
+ * database server. It includes methods for connecting and disconnecting from
+ * the database, executing queries and commands, and managing transactions.
+ */
 class IDBServer
 {
   public:
+    /**
+     * @brief Virtual destructor for the IDatabase interface.
+     *
+     * This ensures that the destructor of the derived class is called
+     * when an object is deleted through a pointer to the base class.
+     */
     virtual ~IDatabase() = default;
 
     // Connect to the database
