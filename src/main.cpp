@@ -1,12 +1,20 @@
 #include "iostream"
+#include <spdlog/spdlog.h>
+
+#define HOST "localhost"
+#define USER
+#define PASSWORD
+#define DATABASE
+#define PORT
 
 int main()
 {
-    std::cout << " Starting the BK Server..." << std::endl;
-    std::cout << " Loading the configuration..." << std::endl;
-    std::cout << " Connecting to the database..." << std::endl;
-    std::cout << " Server is running..." << std::endl;
-    std::cout << " Accepting new connections..." << std::endl;
-    std::cout << " Closing the BK Server..." << std::endl;
+    spdlog::info(" Starting the BK Server...");
+    spdlog::info("Welcome to spdlog!");
+    spdlog::info("Loading the configuration...");
+    spdlog::info("Connecting to the database...");
+    spdlog::info("Server is running...");
+    spdlog::info("Accepting new connections...");
+    spdlog::info("Closing the BK Server...");
     return 0;
 }
