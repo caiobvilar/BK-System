@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Podman
+        uses: redhat-actions/podman-setup@v1
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ libmariadb-dev libspdlog-dev libsdl2-dev libgtest-dev
+
+      - name: Build project
+        run: |
+          mkdir -p build
+          cd build
+          cmake ..
+          make
+
+  test:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/development'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Podman
+        uses: redhat-actions/podman-setup@v1
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ libmariadb-dev libspdlog-dev libsdl2-dev libgtest-dev
+
+      - name: Build project
+        run: |
+          mkdir -p build
+          cd build
+          cmake ..
+          make
+
+      - name: Run tests
+        run: |
+          cd build
+          ctest
