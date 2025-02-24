@@ -12,7 +12,7 @@
 #define PORT 3306
 #define SOCKET "/var/lib/mysql/mysql.sock"
 
-void do_imgui_stuff(SDL_Renderer* sdl2renderer);
+void draw_led_indicator(MYSQL* conn);
 int main()
 {
     spdlog::info(" Starting the BK Server...");
@@ -92,10 +92,33 @@ int main()
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_QUIT)
+            {
                 done = true;
+            }
+            if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_q)
+            {
+                done = true;
+            }
             ImGui_ImplSDL2_ProcessEvent(&event);
         }
-        do_imgui_stuff(renderer);
+
+        // Start the ImGui frame
+        ImGui_ImplSDLRenderer2_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
+        ImGui::NewFrame();
+
+        // Create a simple window
+        ImGui::Begin("Hello, world!");
+        ImGui::Text("This is some useful text.");
+        draw_led_indicator(conn);
+        ImGui::End();
+
+        // Rendering
+        ImGui::Render();
+        SDL_SetRenderDrawColor(renderer, 114, 144, 154, 255);
+        SDL_RenderClear(renderer);
+        ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
+        SDL_RenderPresent(renderer);
     }
 
     // Cleanup
@@ -112,25 +135,24 @@ int main()
     spdlog::info("Closing the BK Server...");
     return 0;
 }
-void do_imgui_stuff(SDL_Renderer* sdl2renderer)
+
+void draw_led_indicator(MYSQL* conn)
 {
-
-    // Start the ImGui frame
-    ImGui_ImplSDLRenderer2_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
-
-    // Create a simple window
-    ImGui::Begin("Hello, world!");
-    // Display stuff on window
-    ImGui::Text("This is some useful text.");
-    // Close window
-    ImGui::End();
-
-    // Rendering
-    ImGui::Render();
-    SDL_SetRenderDrawColor(sdl2renderer, 114, 144, 154, 255);
-    SDL_RenderClear(sdl2renderer);
-    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), sdl2renderer);
-    SDL_RenderPresent(sdl2renderer);
+    bool is_connected = false;
+    if (mysql_ping(conn) == 0)
+    {
+        is_connected = true;
+    } else
+    {
+        is_connected = false;
+    }
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 p = ImGui::GetCursorScreenPos();
+    float radius = 10.0f;
+    ImU32 color =
+        is_connected ? IM_COL32(0, 255, 0, 255) : IM_COL32(255, 0, 0, 255);
+    draw_list->AddCircleFilled(
+        ImVec2(p.x + radius, p.y + radius), radius, color);
+    ImGui::Dummy(
+        ImVec2(radius * 2, radius * 2)); // Add some space after the circle
 }
