@@ -1,0 +1,10 @@
+{
+    "database": {
+        "host": "localhost",
+        "user": "SERVER",
+        "password": "LP5u!2mre6PcJyg#q$2$#2F%4oV36fiVCaSE*H^QM2",
+        "port": 3306,
+        "database_name": "bksysDB",
+        "socket": "/var/lib/mysql/mysql.sock"
+    }
+}

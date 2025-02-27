@@ -33,3 +33,5 @@
 # Folder
 build/*
 .vscode/*
+# Config Files
+config.json
