@@ -6,10 +6,8 @@
 
 ConfigurationManager::ConfigurationManager(const std::string& filePath)
 {
-    if (!filePath.empty())
-    {
-        loadConfig(filePath);
-    }
+    spdlog::info("Creating ConfigurationManager instance...");
+    spdlog::info("Loading configuration file: {}", filePath);
 }
 
 /**
@@ -36,16 +34,19 @@ int ConfigurationManager::loadConfig(const std::string& filePath)
     std::ifstream configFile(filePath);
     if (!configFile.is_open())
     {
-        spdlog::error("Could not open the config file: {}", filePath);
+        spdlog::error(
+            "Could not open the config file: {} {}", filePath, strerror(errno));
         return -1;
-    }
-    try
+    } else
     {
-        configFile >> configData;
-    } catch (const nlohmann::json::parse_error& e)
-    {
-        spdlog::error("Error parsing the config file: {}", e.what());
-        return -1;
+        try
+        {
+            configFile >> this->configData;
+        } catch (const nlohmann::json::parse_error& e)
+        {
+            spdlog::error("Error parsing the config file: {}", e.what());
+            return -1;
+        }
     }
     return 0;
 }
@@ -87,7 +88,7 @@ void ConfigurationManager::setDatabasePassword(const std::string& password)
 
 int ConfigurationManager::getDatabasePort() const
 {
-    return this->configData["database"]["port"];
+    return this->configData["database"]["port"].get<int>();
 }
 
 void ConfigurationManager::setDatabasePort(int port)

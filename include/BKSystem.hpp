@@ -19,7 +19,7 @@ class BKSystem
     /**
      * @brief Constructs a new BKSystem object.
      */
-    BKSystem(std::string config_file_path);
+    explicit BKSystem(const std::string& config_file_path);
 
     /**
      * @brief Destroys the BKSystem object.

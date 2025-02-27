@@ -8,10 +8,19 @@ int main(int argc, char* argv[])
         return -1;
     }
     spdlog::info(" Starting the BK Server...");
-    BKSystem* bkSystem = new BKSystem(argv[1]);
-    bkSystem->run();
+    BKSystem* bkSystem = nullptr;
+    bkSystem = new BKSystem(std::string(argv[1]));
 
-    delete bkSystem;
+    if (bkSystem == nullptr)
+    {
+        spdlog::error("Failed to create the BKSystem object.");
+        delete bkSystem;
+        return -1;
+    } else
+    {
+        bkSystem->run();
+    }
+
     // Perform database operations here
     // Main loop
 }

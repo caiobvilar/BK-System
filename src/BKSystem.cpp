@@ -1,31 +1,29 @@
 #include "BKSystem.hpp"
 
-BKSystem::BKSystem(std::string config_file_path)
+BKSystem::BKSystem(const std::string& config_file_path)
     : configManager(ConfigurationManager::getInstance())
 {
     done = false;
     conn = nullptr;
     window = nullptr;
     renderer = nullptr;
-    if (!this->configManager.loadConfig("config.json"))
+    if (this->configManager.loadConfig("config.json") < 0)
     {
         spdlog::error("Failed to load the configuration file.");
     } else
     {
         spdlog::info("Configuration file loaded successfully.");
-        spdlog::info("Database Host: {}",
-                     this->configManager.getDatabaseHost());
-        spdlog::info("Database User: {}",
-                     this->configManager.getDatabaseUser());
-        spdlog::info("Database Password: {}",
-                     this->configManager.getDatabasePassword());
-        spdlog::info("Database Port: {}",
-                     this->configManager.getDatabasePort());
-        spdlog::info("Database Name: {}",
-                     this->configManager.getDatabaseName());
-        spdlog::info("Database Socket: {}",
-                     this->configManager.getDatabaseSocket());
-        this->init();
+        this->setDatabaseHost(this->configManager.getDatabaseHost());
+        this->setDatabaseUser(this->configManager.getDatabaseUser());
+        this->setDatabasePassword(this->configManager.getDatabasePassword());
+        this->setDatabaseName(this->configManager.getDatabaseName());
+        this->setDatabasePort(this->configManager.getDatabasePort());
+        this->setDatabaseSocket(this->configManager.getDatabaseSocket());
+
+        if (this->init() < 0)
+        {
+            spdlog::error("Failed to initialize the BKSystem.");
+        }
     }
 }
 
@@ -56,19 +54,19 @@ void BKSystem::draw_led_indicator(MYSQL* conn)
 void BKSystem::run()
 {
 
-    bool done = false;
-    while (!done)
+    this->done = false;
+    while (!this->done)
     {
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_QUIT)
             {
-                done = true;
+                this->done = true;
             }
             if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_q)
             {
-                done = true;
+                this->done = true;
             }
             ImGui_ImplSDL2_ProcessEvent(&event);
         }
@@ -80,8 +78,15 @@ void BKSystem::run()
 
         // Create a simple window
         ImGui::Begin("Hello, world!");
-        ImGui::Text("This is some useful text.");
+        // Draw the database name
+        ImGui::Text("Database Name: %s", this->databaseName.c_str());
+        ImGui::Text("Database User: %s", this->databaseUser.c_str());
+        ImGui::Text("Database Host: %s", this->databaseHost.c_str());
+        ImGui::Text("Database Port: %d", this->databasePort);
+        ImGui::Text("Database Socket: %s", this->databaseSocket.c_str());
+        // Draw the LED indicator
         draw_led_indicator(this->conn);
+
         ImGui::End();
 
         // Rendering
@@ -92,11 +97,13 @@ void BKSystem::run()
                                               this->renderer);
         SDL_RenderPresent(this->renderer);
     }
+    this->cleanup();
 }
 
 void BKSystem::cleanup()
 {
 
+    this->done = true;
     // Cleanup
     ImGui_ImplSDLRenderer2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
@@ -147,7 +154,7 @@ int BKSystem::init()
     if (this->conn == NULL)
     {
         spdlog::error("mysql_init() failed");
-        return EXIT_FAILURE;
+        return -1;
     }
     // Disable SSL verification
     my_bool ssl_verify = false;
@@ -164,7 +171,7 @@ int BKSystem::init()
     {
         spdlog::error("mysql_real_connect() failed: {}", mysql_error(conn));
         mysql_close(conn);
-        return EXIT_FAILURE;
+        return -1;
     }
 
     return 0;
