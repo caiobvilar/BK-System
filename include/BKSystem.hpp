@@ -26,6 +26,15 @@ class BKSystem
      */
     ~BKSystem();
 
+    void drawgui();
+
+    void DrawCard(const char* title, const char* value, const ImVec4& color);
+
+    void DrawGraph(const char* title,
+                   const std::vector<float>& data,
+                   const ImVec4& color);
+
+    void DrawDashboard();
     /**
      * @brief Draws an LED indicator showing the connection status to the
      * database.

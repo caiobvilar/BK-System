@@ -29,6 +29,138 @@ BKSystem::BKSystem(const std::string& config_file_path)
 
 BKSystem::~BKSystem() {}
 
+void BKSystem::DrawCard(const char* title,
+                        const char* value,
+                        const ImVec4& color)
+{
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, color);
+    ImGui::BeginChild(
+        title, ImVec2(150, 80), true, ImGuiWindowFlags_NoScrollbar);
+    ImGui::Text("%s", title);
+    ImGui::Text("%s", value);
+    ImGui::EndChild();
+    ImGui::PopStyleColor();
+}
+void BKSystem::DrawGraph(const char* title,
+                         const std::vector<float>& data,
+                         const ImVec4& color)
+{
+    ImGui::Text("%s", title);
+    ImGui::PushStyleColor(ImGuiCol_PlotLines, color);
+    ImGui::PlotLines(
+        "", data.data(), data.size(), 0, nullptr, 0.0f, 1.0f, ImVec2(0, 80));
+    ImGui::PopStyleColor();
+}
+
+void BKSystem::DrawDashboard()
+{
+    // Start the ImGui frame
+    ImGui_ImplSDLRenderer2_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+
+    // Left Sidebar
+    ImGui::Begin("Sidebar",
+                 nullptr,
+                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+    ImGui::SetWindowSize(ImVec2(200, ImGui::GetIO().DisplaySize.y));
+    ImGui::Text("BankSys");
+    ImGui::Separator();
+    ImGui::Text("Dashboard");
+    ImGui::Text("Transaction");
+    ImGui::Text("Payment");
+    ImGui::Text("Card");
+    ImGui::Text("Insights");
+    ImGui::Text("Settings");
+    ImGui::End();
+
+    // Main Content
+    ImGui::SetNextWindowPos(ImVec2(200, 0));
+    ImGui::SetNextWindowSize(ImVec2(ImGui::GetIO().DisplaySize.x - 200,
+                                    ImGui::GetIO().DisplaySize.y));
+    ImGui::Begin("Main Content",
+                 nullptr,
+                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+
+    // Top Cards
+    ImGui::Columns(4, nullptr, false);
+    DrawCard("Balance", "$3,596", ImVec4(0.2f, 0.6f, 0.8f, 1.0f));
+    ImGui::NextColumn();
+    DrawCard("Income", "$421", ImVec4(0.2f, 0.8f, 0.4f, 1.0f));
+    ImGui::NextColumn();
+    DrawCard("Expenses", "$164", ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+    ImGui::NextColumn();
+    DrawCard("Savings", "$257", ImVec4(0.8f, 0.6f, 0.2f, 1.0f));
+    ImGui::Columns(1);
+
+    ImGui::Separator();
+
+    // Graph Section
+    ImGui::Text("Finances");
+    std::vector<float> incomeData = {0.2f, 0.4f, 0.6f, 0.8f, 1.0f};
+    std::vector<float> expenseData = {0.8f, 0.6f, 0.4f, 0.2f, 0.1f};
+    DrawGraph("Income", incomeData, ImVec4(0.2f, 0.8f, 0.4f, 1.0f));
+    DrawGraph("Expenses", expenseData, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+
+    ImGui::Separator();
+
+    // Transaction History
+    ImGui::Text("Transaction History");
+    if (ImGui::BeginTable(
+            "Transactions", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
+    {
+        ImGui::TableSetupColumn("Name");
+        ImGui::TableSetupColumn("Type");
+        ImGui::TableSetupColumn("Amount");
+        ImGui::TableHeadersRow();
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("Aaron Evans");
+        ImGui::TableSetColumnIndex(1);
+        ImGui::Text("Food");
+        ImGui::TableSetColumnIndex(2);
+        ImGui::Text("$45");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("Clement Stewart");
+        ImGui::TableSetColumnIndex(1);
+        ImGui::Text("Shopping");
+        ImGui::TableSetColumnIndex(2);
+        ImGui::Text("-$241");
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::Text("Jessica Johanne");
+        ImGui::TableSetColumnIndex(1);
+        ImGui::Text("Others");
+        ImGui::TableSetColumnIndex(2);
+        ImGui::Text("$100");
+
+        ImGui::EndTable();
+    }
+
+    ImGui::End();
+}
+
+void BKSystem::drawgui()
+{
+
+    // Create a simple window
+    ImGui::Begin("Hello, world!");
+    // Draw the database name
+    ImGui::Text("Database Name: %s", this->databaseName.c_str());
+    ImGui::Text("Database User: %s", this->databaseUser.c_str());
+    ImGui::Text("Database Host: %s", this->databaseHost.c_str());
+    ImGui::Text("Database Port: %d", this->databasePort);
+    ImGui::Text("Database Socket: %s", this->databaseSocket.c_str());
+    // Draw the LED indicator
+    draw_led_indicator(this->conn);
+
+    ImGui::End();
+}
+
 void BKSystem::draw_led_indicator(MYSQL* conn)
 {
 
@@ -70,25 +202,7 @@ void BKSystem::run()
             }
             ImGui_ImplSDL2_ProcessEvent(&event);
         }
-
-        // Start the ImGui frame
-        ImGui_ImplSDLRenderer2_NewFrame();
-        ImGui_ImplSDL2_NewFrame();
-        ImGui::NewFrame();
-
-        // Create a simple window
-        ImGui::Begin("Hello, world!");
-        // Draw the database name
-        ImGui::Text("Database Name: %s", this->databaseName.c_str());
-        ImGui::Text("Database User: %s", this->databaseUser.c_str());
-        ImGui::Text("Database Host: %s", this->databaseHost.c_str());
-        ImGui::Text("Database Port: %d", this->databasePort);
-        ImGui::Text("Database Socket: %s", this->databaseSocket.c_str());
-        // Draw the LED indicator
-        draw_led_indicator(this->conn);
-
-        ImGui::End();
-
+        this->DrawDashboard();
         // Rendering
         ImGui::Render();
         SDL_SetRenderDrawColor(this->renderer, 114, 144, 154, 255);
