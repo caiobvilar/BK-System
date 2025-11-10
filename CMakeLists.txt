@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Set the project name
 project(BK-System VERSION 0.1 LANGUAGES CXX)
 
@@ -17,6 +19,7 @@ find_package(nlohmann_json REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(imgui REQUIRED)
+find_package(beauty REQUIRED)
 # Add an executable
 
 add_executable(
@@ -49,4 +52,5 @@ target_link_libraries(
     SDL2::SDL2
     imgui::imgui
     ConfigurationManager
+    beauty::beauty
 )

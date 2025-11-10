@@ -19,6 +19,7 @@ class BKSysRecipe(ConanFile):
         self.requires("nlohmann_json/3.11.3")
         self.requires("imgui/1.91.5")
         self.requires("sdl/2.30.9")
+        self.requires("beauty/1.0.6")
 
     def generate(self):
         copy(self, "*sdl2*", os.path.join(self.dependencies["imgui"].package_folder,

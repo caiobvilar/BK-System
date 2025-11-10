@@ -7,7 +7,21 @@
     "settings": {
         "editor.formatOnSave": true,
         "clang-format.executable": "/usr/bin/clang-format",
+        "clang-format.assumeFilename": "clang-format",
         "c-cpp-flylint.cppcheck.executable": "/usr/bin/cppcheck",
+        "cmake.buildDirectory": "${workspaceFolder}/build",
+        "cppcheck.executable": "/usr/bin/cppcheck", // Adjust for your actual install location
+        "cppcheck.options": [
+            "--enable=all",
+            "--inconclusive",
+            "--std=c++17", // Match your project std
+            "--language=c++"
+        ],
+        "cppcheck.includePaths": [
+            "${workspaceFolder}/include",
+            "${workspaceFolder}/src"
+        ],
+        "cppcheck.forceLanguage": "c++",
         "files.associations": {
             ".fantomasignore": "ignore",
             "*.ipp": "cpp",
