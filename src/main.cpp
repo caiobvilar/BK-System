@@ -1,7 +1,4 @@
 #include "BKSystem.hpp"
-#include <beauty/beauty.hpp>
-#include <spdlog/spdlog.h>
-#include <string>
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {

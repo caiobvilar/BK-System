@@ -35,3 +35,7 @@ build/*
 .vscode/*
 # Config Files
 config.json
+# Certs
+*.crt
+*.pem
+*.key
