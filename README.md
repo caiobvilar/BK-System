@@ -1,6 +1,21 @@
 # BK-System
 Banking System in C++ with MariaDB
 
+## Running locally
+
+DB connection settings come from the environment -- nothing is hardcoded.
+
+```bash
+export BKSYS_DB_PASSWORD="your-local-dev-password"   # required
+export BKSYS_DB_HOST=localhost                        # optional, default shown
+export BKSYS_DB_USER=SERVER                            # optional, default shown
+export BKSYS_DB_NAME=bksysDB                           # optional, default shown
+export BKSYS_DB_PORT=3306                              # optional, default shown
+export BKSYS_DB_SOCKET=/var/lib/mysql/mysql.sock       # optional, default shown
+```
+
+The server refuses to start if `BKSYS_DB_PASSWORD` is unset.
+
 ## Software Requirements Specification (SRS) for a Banking System with UI
 
 ## 1. Introduction

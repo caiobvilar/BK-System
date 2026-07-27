@@ -2,15 +2,18 @@
 #include "../bindings/imgui_impl_sdlrenderer2.h"
 #include "iostream"
 #include <SDL2/SDL.h>
+#include <cstdlib>
 #include <imgui.h>
 #include <mariadb/mysql.h>
 #include <spdlog/spdlog.h>
-#define HOST "localhost"
-#define USER "SERVER"
-#define PASSWORD "LP5u!2mre6PcJyg#q$2$#2F%4oV36fiVCaSE*H^QM2"
-#define DATABASE "bksysDB"
-#define PORT 3306
-#define SOCKET "/var/lib/mysql/mysql.sock"
+
+// DB connection parameters come from the environment, never hardcoded.
+// Required: BKSYS_DB_PASSWORD. The rest have sane localhost-dev defaults.
+static const char* env_or(const char* name, const char* fallback)
+{
+    const char* value = std::getenv(name);
+    return (value != nullptr) ? value : fallback;
+}
 
 void draw_led_indicator(MYSQL* conn);
 int main()
@@ -18,6 +21,22 @@ int main()
     spdlog::info(" Starting the BK Server...");
     spdlog::info("Welcome to spdlog!");
     spdlog::info("Loading the configuration...");
+
+    const char* db_password = std::getenv("BKSYS_DB_PASSWORD");
+    if (db_password == nullptr)
+    {
+        spdlog::error(
+            "BKSYS_DB_PASSWORD is not set. Refusing to start without a "
+            "database credential -- see README for local dev setup.");
+        return EXIT_FAILURE;
+    }
+    const char* db_host = env_or("BKSYS_DB_HOST", "localhost");
+    const char* db_user = env_or("BKSYS_DB_USER", "SERVER");
+    const char* db_name = env_or("BKSYS_DB_NAME", "bksysDB");
+    const char* db_socket = env_or("BKSYS_DB_SOCKET", "/var/lib/mysql/mysql.sock");
+    const unsigned int db_port =
+        static_cast<unsigned int>(std::atoi(env_or("BKSYS_DB_PORT", "3306")));
+
     // Initialize MySQL library
     MYSQL* conn;
     conn = mysql_init(NULL);
@@ -30,8 +49,8 @@ int main()
     my_bool ssl_verify = false;
     mysql_options(conn, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, &ssl_verify);
     // Connect to the database
-    if (mysql_real_connect(
-            conn, HOST, USER, PASSWORD, DATABASE, PORT, SOCKET, 0) == NULL)
+    if (mysql_real_connect(conn, db_host, db_user, db_password, db_name,
+                            db_port, db_socket, 0) == NULL)
     {
         spdlog::error("mysql_real_connect() failed: {}", mysql_error(conn));
         mysql_close(conn);
