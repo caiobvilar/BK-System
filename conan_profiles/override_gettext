@@ -1,0 +1,4 @@
+include(default)
+
+[tool_requires]
+pulseaudio/*: gettext/1.0

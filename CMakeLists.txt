@@ -5,6 +5,7 @@ project(BK-System VERSION 0.1 LANGUAGES CXX)
 
 add_subdirectory(src)
 add_subdirectory(bindings)
+add_subdirectory(ConfigurationManager)
 
 find_package(fmt REQUIRED)
 find_package(asio REQUIRED)
@@ -42,4 +43,5 @@ target_link_libraries(
     ZLIB::ZLIB
     SDL2::SDL2
     imgui::imgui
+    ConfigurationManager
 )

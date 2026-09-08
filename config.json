@@ -1,0 +1,9 @@
+{
+    "database": {
+        "host": "localhost",
+        "user": "SERVER",
+        "port": 3306,
+        "database_name": "bksysDB",
+        "socket": "/var/lib/mysql/mysql.sock"
+    }
+}

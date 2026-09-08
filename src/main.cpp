@@ -1,18 +1,32 @@
 #include "../bindings/imgui_impl_sdl2.h"
 #include "../bindings/imgui_impl_sdlrenderer2.h"
+#include "ConfigurationManager.hpp"
 #include "iostream"
 #include <SDL2/SDL.h>
 #include <cstdlib>
 #include <imgui.h>
 #include <mariadb/mysql.h>
 #include <spdlog/spdlog.h>
+#include <string>
 
-// DB connection parameters come from the environment, never hardcoded.
-// Required: BKSYS_DB_PASSWORD. The rest have sane localhost-dev defaults.
-static const char* env_or(const char* name, const char* fallback)
+// DB connection parameters are resolved with the precedence:
+//   environment variable > config.json > built-in default.
+// The password (BKSYS_DB_PASSWORD) comes from the environment ONLY and is
+// never stored in config.json or hardcoded.
+static std::string env_or_config(const char* name,
+                                 const std::string& configValue,
+                                 const char* fallback)
 {
     const char* value = std::getenv(name);
-    return (value != nullptr) ? value : fallback;
+    if (value != nullptr)
+    {
+        return std::string(value);
+    }
+    if (!configValue.empty())
+    {
+        return configValue;
+    }
+    return std::string(fallback);
 }
 
 void draw_led_indicator(MYSQL* conn);
@@ -22,6 +36,15 @@ int main()
     spdlog::info("Welcome to spdlog!");
     spdlog::info("Loading the configuration...");
 
+    // Configure the app/system from config.json (see ConfigurationManager).
+    ConfigurationManager& config =
+        ConfigurationManager::getInstance("config.json");
+    if (config.loadConfig("config.json") != 0)
+    {
+        spdlog::warn("Could not load config.json; falling back to environment "
+                     "variables / defaults for DB settings.");
+    }
+
     const char* db_password = std::getenv("BKSYS_DB_PASSWORD");
     if (db_password == nullptr)
     {
@@ -30,12 +53,19 @@ int main()
             "database credential -- see README for local dev setup.");
         return EXIT_FAILURE;
     }
-    const char* db_host = env_or("BKSYS_DB_HOST", "localhost");
-    const char* db_user = env_or("BKSYS_DB_USER", "SERVER");
-    const char* db_name = env_or("BKSYS_DB_NAME", "bksysDB");
-    const char* db_socket = env_or("BKSYS_DB_SOCKET", "/var/lib/mysql/mysql.sock");
-    const unsigned int db_port =
-        static_cast<unsigned int>(std::atoi(env_or("BKSYS_DB_PORT", "3306")));
+    const std::string db_host =
+        env_or_config("BKSYS_DB_HOST", config.getDatabaseHost(), "localhost");
+    const std::string db_user =
+        env_or_config("BKSYS_DB_USER", config.getDatabaseUser(), "SERVER");
+    const std::string db_name =
+        env_or_config("BKSYS_DB_NAME", config.getDatabaseName(), "bksysDB");
+    const std::string db_socket = env_or_config("BKSYS_DB_SOCKET",
+                                                config.getDatabaseSocket(),
+                                                "/var/lib/mysql/mysql.sock");
+    const unsigned int db_port = static_cast<unsigned int>(std::atoi(
+        env_or_config(
+            "BKSYS_DB_PORT", std::to_string(config.getDatabasePort()), "3306")
+            .c_str()));
 
     // Initialize MySQL library
     MYSQL* conn;
@@ -49,8 +79,14 @@ int main()
     my_bool ssl_verify = false;
     mysql_options(conn, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, &ssl_verify);
     // Connect to the database
-    if (mysql_real_connect(conn, db_host, db_user, db_password, db_name,
-                            db_port, db_socket, 0) == NULL)
+    if (mysql_real_connect(conn,
+                           db_host.c_str(),
+                           db_user.c_str(),
+                           db_password,
+                           db_name.c_str(),
+                           db_port,
+                           db_socket.c_str(),
+                           0) == NULL)
     {
         spdlog::error("mysql_real_connect() failed: {}", mysql_error(conn));
         mysql_close(conn);
